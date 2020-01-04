@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <title>Zipcode Lookup Demo</title>
+
+  </head>
+  <body>
+
+  	  
+  	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+	    <a class="navbar-brand" href="#">Zipcode REST API - Demo</a>
+	</nav>
+	
+	<main role="main" class="container">
+		<h1>Zipcode Lookup</h1>
+		<h6 class="text-muted">Find zipcodes by...</h6>
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+		  <li class="nav-item">
+		    <a class="nav-link active" id="population-tab" data-toggle="tab" href="#population" role="tab" aria-controls="population" aria-selected="true">Population</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" id="medianAge-tab" data-toggle="tab" href="#medianAge" role="tab" aria-controls="medianAge" aria-selected="false">Median Age</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" id="popular-tab" data-toggle="tab" href="#popular" role="tab" aria-controls="popular" aria-selected="false">Most Popular</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" id="female-dominant-tab" data-toggle="tab" href="#femaleDominant" role="tab" aria-controls="femaleDominant" aria-selected="false">Female Dominant</a>
+		  </li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+		  <div class="tab-pane fade show active" id="population" role="tabpanel" aria-labelledby="population-tab">
+		  	<form id="populationForm" class="filterForm">
+			  <div class="form-row">
+			    <div class="col-auto">
+			      <input id="populationMin" type="text" class="form-control" placeholder="Minimum">
+			    </div>
+			    <div class="col-auto">
+			      <input id="populationMax" type="text" class="form-control" placeholder="Maximum">
+			    </div>
+			    <div class="col-auto">
+			      <button type="submit" class="btn btn-primary mb-2 queryBtn">Run Query</button>
+			    </div>
+			  </div>
+			  
+			</form>
+		  </div>
+		  <div class="tab-pane fade" id="medianAge" role="tabpanel" aria-labelledby="medianAge-tab">
+		  	<form id="medianAgeForm" class="filterForm">
+			  <div class="form-row">
+			    <div class="col-auto">
+			      <input id="medianAgeMin" type="text" class="form-control" placeholder="Minimum">
+			    </div>
+			    <div class="col-auto">
+			      <input id="medianAgeMax" type="text" class="form-control" placeholder="Maximum">
+			    </div>
+			    <div class="col-auto">
+			      <button type="submit" class="btn btn-primary mb-2 queryBtn">Run Query</button>
+			    </div>
+			  </div>
+			  
+			</form>
+		  </div>
+		  <div class="tab-pane fade" id="popular" role="tabpanel" aria-labelledby="popular-tab">
+		  	<form id="popularForm" class="filterForm">
+			  <div class="form-row">
+			  	<div class="col-auto">
+			      <input id="limit" type="text" class="form-control" placeholder="Top">
+			    </div>
+			    <div class="col-auto">
+			      <button type="submit" class="btn btn-primary mb-2 queryBtn">Run Query</button>
+			    </div>
+			  </div>
+			  
+			</form>
+		  </div>
+		  <div class="tab-pane fade" id="femaleDominant" role="tabpanel" aria-labelledby="female-dominant-tab">
+		  	<form id="femaleDominantForm" class="filterForm">
+			  <div class="form-row">
+			    <div class="col-auto">
+			      <button type="submit" class="btn btn-primary mb-2 queryBtn">Run Query</button>
+			    </div>
+			  </div>
+			  
+			</form>
+		  </div>
+		</div>
+		
+		<h3>Results:</h3>
+		<table id="resultTable" class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">Zipcode</th>
+					<th scope="col">Total Population</th>
+					<th scope="col">Median Age</th>
+					<th scope="col">Total Males</th>
+					<th scope="col">Total Females</th>
+					<th scope="col">Total Households</th>
+					<th scope="col">Average Household Size</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>	
+
+	</main>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  	
+  	<script>
+  		$(function(){
+  			
+  			var formHandlers = {};
+  			
+  			formHandlers['populationForm'] = function($form){
+  				
+  				if(validateForm($form) === true){
+  					var min = $form.find('#populationMin').val();
+  	  				var max = $form.find('#populationMax').val();
+  	  				
+  	  				var urlParts = [];
+  	  				urlParts.push('/api/v1/zipcodes?');
+  	  				urlParts.push('minPopulation=' + encodeURIComponent(min));
+  	  				urlParts.push('&maxPopulation=' + encodeURIComponent(max));
+  	  				serverCall(urlParts.join(''));
+  				}
+
+  			}
+  			
+			formHandlers['medianAgeForm'] = function($form){
+  				
+  				if(validateForm($form) === true){
+  					var min = $form.find('#medianAgeMin').val();
+  	  				var max = $form.find('#medianAgeMax').val();
+  	  				
+  	  				var urlParts = [];
+  	  				urlParts.push('/api/v1/zipcodes?');
+  	  				urlParts.push('minAge=' + encodeURIComponent(min));
+  	  				urlParts.push('&maxAge=' + encodeURIComponent(max));
+  	  				serverCall(urlParts.join(''));
+  				}
+
+  			}
+			
+			formHandlers['popularForm'] = function($form){
+  				
+  				if(validateForm($form) === true){
+  					
+  	  				var urlParts = [];
+  	  				urlParts.push('/api/v1/zipcodes?');
+  	  				urlParts.push('top=' + encodeURIComponent($form.find('#limit').val()));
+  	  				serverCall(urlParts.join(''));
+  				}
+
+  			}
+			
+			formHandlers['femaleDominantForm'] = function($form){
+  				
+  				if(validateForm($form) === true){
+  					
+  	  				var urlParts = [];
+  	  				urlParts.push('/api/v1/zipcodes?moreFemalesThanMales=1');
+  	  				serverCall(urlParts.join(''));
+  				}
+
+  			}
+  			
+  			function validateForm($form){
+  				// TODO: Write validation based on form id
+  				var isValid = true;
+  				return isValid;
+  			}
+  			
+  			function serverCall(url){
+  				
+  				// TODO: Start loading indicator here
+  				
+  				$.ajax({
+  					url : url,
+  					data : null,
+  					type : "GET",
+  					contentType : "application/json; charset=utf-8",
+  					dataType : "json",
+  					success : function(zipcodes) {
+						reloadQueryResults(zipcodes);  						
+  					},
+  					error : function() {
+  						alert('Oops. Something went wrong');
+  					},
+  					complete : function() {
+  						// TODO: End loading indicator here
+  					}
+  				});
+  			}
+  			
+  			function reloadQueryResults(zipcodes){
+  				
+  				$('#resultTable tbody').html('');
+  				
+  				for(var i in zipcodes){
+  					var zipcode = zipcodes[i];
+  					var $tr = $('<tr/>');
+  					$tr.append('<td>' + zipcode.zipcode + '</td>');
+  					$tr.append('<td>' + zipcode.totalPopulation + '</td>');
+  					$tr.append('<td>' + zipcode.medianAge + '</td>');
+  					$tr.append('<td>' + zipcode.totalMales + '</td>');
+  					$tr.append('<td>' + zipcode.totalFemales + '</td>');
+  					$tr.append('<td>' + zipcode.totalHouseholds + '</td>');
+  					$tr.append('<td>' + zipcode.averageHouseholdSize + '</td>');
+  					$tr.appendTo($('#resultTable tbody'));
+  				}
+  			}
+
+  			$('.filterForm').submit(function( event ) {
+  			  	event.preventDefault();
+  			  	var $form = $(this);
+  			  	formHandlers[$form.attr('id')]($form);
+  				console.log('id: ' + $form.attr('id'));
+  			});
+  			
+  			
+  		});
+  	</script>
+
+
+</body>
+</html>
